@@ -7,7 +7,7 @@ This is a program that runs a basic fuzzer on a webpage and reports
 which javascript objects were able to penetrate the webpage
 '''
 
-import argparse as ap
+import argparse
 import time
 import requests
 from bs4 import BeautifulSoup as bs
@@ -15,27 +15,6 @@ from bs4 import BeautifulSoup as bs
 NUM_VULNERABILITIES = 1
 URL = "http://www.cs.tufts.edu/comp/120/hackme.php"
 VERBOSITY = 15
-
-def arguements():
-    '''
-    Creates the argument parser
-
-    Output:
-    * a parser object
-    '''
-    parser = ap.ArgumentParser(description='A fuzzer to determine basic \
-                                            XSS vulnerabilities \
-                                            on any website')
-    parser.add_argument('-w', dest='website', 
-                              help='A website to detect vulnerabilities on',
-                              default=URL)
-    parser.add_argument('-l', dest='fuzz',
-                              help='A text file containing a list \
-                                    of fuzz vectors')
-    parser.add_argument('-o', dest='oFile', 
-                              help='A file to store the output of the program')
-
-    return parser.parse_args()
 
 def extract_details(form):
     '''
@@ -206,13 +185,20 @@ def print_vulnerability(vulner, oFile):
         NUM_VULNERABILITIES += 1
 
 def main():
-    args = arguements()
+    parser = argparse.ArgumentParser(description='A fuzzer to determine basic \
+                                            XSS vulnerabilities \
+                                            on any website')
+    parser.add_argument('-l', dest='fuzz', required=True,
+                              help='A text file containing a list \
+                                    of fuzz vectors')
+    parser.add_argument('-w', dest='website', required=False, default=URL
+                        help='A website to detect vulnerabilities on')
+    parser.add_argument('-o', dest='oFile', required=False,
+                        help='A file to store the output of the program')
+    parser.add_argument('-v', dest='verb', required=False, default=15,
+                        help="Verbosity of the program"
 
-    if not args.fuzz:
-        print(f"\n**********ERROR INCORRECT USAGE*********")
-        print(f"USAGE: python fuzz.py -l <fuzzFile.txt>")
-        print(f"Optional Params: -w <website> -o outputFile\n")
-        exit(1)
+    args = parser.parse_args()
 
     try:
         data = requests.get(args.website)
